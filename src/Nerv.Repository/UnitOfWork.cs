@@ -15,14 +15,15 @@ public class UnitOfWork(DbContext dbContext, ILogger<UnitOfWork> logger) : IUnit
     public IRepository<T> Repository<T>() where T : class
     {
         var type = typeof(T);
-        if (!_repositories.ContainsKey(type))
+        if (!_repositories.TryGetValue(type, out object? value))
         {
             var repoType = typeof(Repository<>).MakeGenericType(type);
             var instance = Activator.CreateInstance(repoType, _dbContext)!;
-            _repositories[type] = instance;
+            value = instance;
+            _repositories[type] = value;
         }
 
-        return (IRepository<T>)_repositories[type];
+        return (IRepository<T>)value;
     }
 
     public async Task<int> SaveChangesAsync()
@@ -32,8 +33,7 @@ public class UnitOfWork(DbContext dbContext, ILogger<UnitOfWork> logger) : IUnit
 
     public async Task BeginTransactionAsync()
     {
-        if (_transaction == null)
-            _transaction = await _dbContext.Database.BeginTransactionAsync();
+        _transaction ??= await _dbContext.Database.BeginTransactionAsync();
     }
 
     public async Task CommitTransactionAsync()

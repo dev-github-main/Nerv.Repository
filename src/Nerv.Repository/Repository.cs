@@ -26,8 +26,11 @@ public class Repository<T>(IDataContext context) : IRepository<T>, IReadOnlyRepo
     public async Task AddAsync(T entity)
         => await _context.AddAsync(entity);
 
+
     public void Remove(T entity) => _context.Remove(entity);
+
     public void Update(T entity) => _context.Update(entity);
+
     public IQueryable<T> Query() => _context.Query<T>();
 
     public async Task<PagedResult<T>> GetPagedAsync(Expression<Func<T, bool>>? predicate, int page, int pageSize)
