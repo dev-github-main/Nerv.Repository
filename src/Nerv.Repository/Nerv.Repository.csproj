@@ -1,11 +1,15 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-  <ItemGroup>
-    <ProjectReference Include="..\Nerv.Repository.Abstractions\Nerv.Repository.Abstractions.csproj" />
-  </ItemGroup>
-
   <PropertyGroup>
     <TargetFramework>net9.0</TargetFramework>
+    <Version>1.0.0</Version> <!-- aggiorna per ogni rilascio -->
+    <Authors>Nerv</Authors>
+    <Company>Nerv</Company>
+    <Description>Generic repository + unit of work pattern with audit and actor support for EF Core.</Description>
+    <PackageTags>repository;unitofwork;efcore;audit;dotnet</PackageTags>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
   </PropertyGroup>
