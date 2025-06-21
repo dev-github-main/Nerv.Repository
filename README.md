@@ -18,6 +18,7 @@ Designed for clean architecture, testability, and ease of integration across any
 - Actor context integration for automatic user tracking
 - Global `DbContextBase` with auto-audit and soft-delete filters
 - Pagination and filtering utilities
+- Repository model configuration via `UnitOfWorkOptions` (including table name pluralization using [Humanizer](https://github.com/Humanizr/Humanizer))
 - Ready-to-use in-memory tests
 
 ---
@@ -58,24 +59,38 @@ builder.Services.AddHttpContextAccessor();
 
 // Register everything using the AddRepositoryPattern extension
 builder.Services.AddRepositoryPattern<AppDbContext, Guid>(
-    options => 
+    // DbContext configuration
+    options =>
     {
+        // Retrieve connection string from configuration
         var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+        
+        // Configure EF Core provider (in this case, SQL Server)
         options.UseSqlServer(connectionString);
     },
+    // ActorContext factory configuration (used for audit tracking)
     provider =>
     {
-        // This is the actor factory, resolved per request
+        // Resolve IHttpContextAccessor to access the current HTTP context
         var httpContextAccessor = provider.GetRequiredService<IHttpContextAccessor>();
         var httpContext = httpContextAccessor.HttpContext;
 
+        // Extract the user ID from claims (e.g. OpenID Connect "sub" claim)
         var userIdClaim = httpContext?.User?.FindFirst("sub")?.Value;
 
+        // Parse the user ID or fallback to Guid.Empty if not authenticated
         Guid userId = userIdClaim != null 
             ? Guid.Parse(userIdClaim)
-            : Guid.Empty; // fallback if not authenticated
+            : Guid.Empty;
 
+        // Return ActorContext to be injected into DbContextBase
         return new ActorContext<Guid> { UserId = userId };
+    },
+    // UnitOfWork options configuration (repository model customization)
+    uowOptions =>
+    {
+        // Enable pluralization of table names (e.g. User -> Users)
+        uowOptions.RepositoryModelOptions.UsePluralization = true;
     }
 );
 ```
@@ -146,17 +161,27 @@ public class UserTests
 ```
 src/
   Nerv.Repository/
-    Abstractions/
-    Contexts/
-    Extensions/
-    LogEntities/
-tests/
-  Nerv.Repository.Tests/
-    Context/
-    Entities/
-    Fixtures/
-    Repositories/
-    UnitOfWork/
+    Abstractions/        # Interfaces and contracts
+    Contexts/            # DbContext and actor context
+    Extensions/          # Extension methods
+    LogEntities/         # Entities for audit logging
+    Entities/            # Domain entities
+    Models/              # Supporting models (e.g. pagination)
+    Options/             # Configuration options (UnitOfWorkOptions, RepositoryModelOptions)
+  tests/
+    Nerv.Repository.Tests/
+      Context/           # Test DbContext definitions
+      Entities/          # Test entities
+      Fixtures/          # Test setup utilities
+      Helpers/           # Shared test helpers (e.g. UnitOfWorkOptions factory)
+      Repositories/      # Repository-specific tests
+      UnitOfWork/        # UnitOfWork-specific tests
+  scripts/
+    clean-empty-lines.sh # Empty line cleanup script
+Nerv.Repository.sln       # Solution file at repository root
+.editorconfig             # Consistent formatting rules
+.vscode/settings.json     # VSCode editor configuration
+.git/hooks/pre-commit     # Pre-commit hook for automatic cleanup
 ```
 
 ---
@@ -176,3 +201,4 @@ Feel free to open issues or pull requests. Contributions are welcome!
 ## 🔗 Related Projects
 
 - [Entity Framework Core](https://docs.microsoft.com/en-us/ef/core/)
+- [Humanizer](https://github.com/Humanizr/Humanizer) — Used for automatic pluralization of table names
