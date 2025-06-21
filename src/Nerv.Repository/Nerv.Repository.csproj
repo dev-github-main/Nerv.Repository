@@ -3,7 +3,7 @@
   <PropertyGroup>
     <TargetFramework>net9.0</TargetFramework>
     <PackageId>Nerv.Repository</PackageId>
-    <Version>1.0.1</Version> <!-- aggiorna per ogni rilascio -->
+    <Version>1.0.2</Version> <!-- aggiorna per ogni rilascio -->
     <Authors>Nerv</Authors>
     <Company>Nerv</Company>
     <Description>Generic repository + unit of work pattern with audit and actor support for EF Core.</Description>
