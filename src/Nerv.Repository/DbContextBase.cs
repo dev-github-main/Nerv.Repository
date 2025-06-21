@@ -68,4 +68,9 @@ public abstract class DbContextBase<TUserId>(DbContextOptions options, ActorCont
     void IDataContext.Update<T>(T entity) => Set<T>().Update(entity);
 
     void IDataContext.Remove<T>(T entity) => Set<T>().Remove(entity);
+
+    void IDataContext.ApplyDatabaseMigrations()
+    {
+        Database.Migrate();
+    }
 }

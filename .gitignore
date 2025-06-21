@@ -440,3 +440,5 @@ Temporary Items
 # Ignore all local history of files
 .history
 .ionide
+src/Nerv.Repository/LICENSE
+src/Nerv.Repository/README.md

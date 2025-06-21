@@ -1,6 +1,6 @@
 # Nerv.Repository
 
-[![Build Status](https://img.shields.io/badge/build-passing-brightgreen.svg)](https://github.com/tuo-utente/Nerv.Repository/actions)
+[![Repository](https://img.shields.io/badge/code-GitHub-blue.svg)](https://github.com/dev-github-main/Nerv.Repository)
 [![NuGet](https://img.shields.io/nuget/v/Nerv.Repository.svg)](https://www.nuget.org/packages/Nerv.Repository/)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
@@ -51,7 +51,33 @@ public class AppDbContext : DbContextBase<Guid>
 
 ### 3. Register dependencies
 ```csharp
-services.AddNervRepository<AppDbContext, Guid>();
+var builder = WebApplication.CreateBuilder(args);
+
+// Register IHttpContextAccessor (needed to access HTTP context)
+builder.Services.AddHttpContextAccessor();
+
+// Register everything using the AddRepositoryPattern extension
+builder.Services.AddRepositoryPattern<AppDbContext, Guid>(
+    options => 
+    {
+        var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+        options.UseSqlServer(connectionString);
+    },
+    provider =>
+    {
+        // This is the actor factory, resolved per request
+        var httpContextAccessor = provider.GetRequiredService<IHttpContextAccessor>();
+        var httpContext = httpContextAccessor.HttpContext;
+
+        var userIdClaim = httpContext?.User?.FindFirst("sub")?.Value;
+
+        Guid userId = userIdClaim != null 
+            ? Guid.Parse(userIdClaim)
+            : Guid.Empty; // fallback if not authenticated
+
+        return new ActorContext<Guid> { UserId = userId };
+    }
+);
 ```
 
 ### 4. Use in your services
