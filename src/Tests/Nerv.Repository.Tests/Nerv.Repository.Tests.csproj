@@ -21,8 +21,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\Nerv.Repository\Nerv.Repository.csproj" />
-    <ProjectReference Include="..\..\src\Nerv.Repository.Abstractions\Nerv.Repository.Abstractions.csproj" />
+    <ProjectReference Include="..\..\Nerv.Repository\Nerv.Repository.csproj" />
   </ItemGroup>
 
 </Project>

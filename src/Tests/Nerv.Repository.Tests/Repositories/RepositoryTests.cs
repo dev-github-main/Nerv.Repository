@@ -1,4 +1,4 @@
-namespace Nerv.Repository.Tests.Repositories;
+﻿namespace Nerv.Repository.Tests.Repositories;
 
 using System;
 using System.Linq;

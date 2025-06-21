@@ -1,4 +1,4 @@
-namespace Nerv.Repository.LogEntities;
+﻿namespace Nerv.Repository.LogEntities;
 
 public class ChangeLog
 {

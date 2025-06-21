@@ -1,4 +1,4 @@
-namespace Nerv.Repository.Abstractions.Entities;
+﻿namespace Nerv.Repository.Abstractions.Entities;
 
 public interface IEntity { }
 

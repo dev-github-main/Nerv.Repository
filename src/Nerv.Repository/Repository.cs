@@ -1,13 +1,15 @@
-namespace Nerv.Repository;
+﻿namespace Nerv.Repository;
 
 using Microsoft.EntityFrameworkCore;
 using Nerv.Repository.Abstractions;
 using Nerv.Repository.Models;
+using Nerv.Repository.Options;
 using System.Linq.Expressions;
 
-public class Repository<T>(IDataContext context) : IRepository<T>, IReadOnlyRepository<T> where T : class
+public class Repository<T>(IDataContext context, UnitOfWorkOptions options) : IRepository<T>, IReadOnlyRepository<T> where T : class
 {
     private readonly IDataContext _context = context;
+    private readonly UnitOfWorkOptions _options = options;
 
     public async Task<IQueryable<T>> FindAsync(Expression<Func<T, bool>> predicate)
         => await Task.FromResult(_context.Query<T>().Where(predicate));
@@ -25,7 +27,6 @@ public class Repository<T>(IDataContext context) : IRepository<T>, IReadOnlyRepo
 
     public async Task AddAsync(T entity)
         => await _context.AddAsync(entity);
-
 
     public void Remove(T entity) => _context.Remove(entity);
 

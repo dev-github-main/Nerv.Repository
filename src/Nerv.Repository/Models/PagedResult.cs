@@ -1,4 +1,4 @@
-namespace Nerv.Repository.Models;
+﻿namespace Nerv.Repository.Models;
 
 public class PagedResult<T>
 {

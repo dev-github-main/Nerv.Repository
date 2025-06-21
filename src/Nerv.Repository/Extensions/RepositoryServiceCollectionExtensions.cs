@@ -1,9 +1,10 @@
-namespace Nerv.Repository.Extensions;
+﻿namespace Nerv.Repository.Extensions;
 
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Nerv.Repository.Abstractions;
 using Nerv.Repository.Contexts;
+using Nerv.Repository.Options;
 
 /// <summary>
 /// Provides extension methods for automatic registration of repository pattern infrastructure.
@@ -18,11 +19,13 @@ public static class RepositoryServiceCollectionExtensions
     /// <param name="services">The IServiceCollection to register services with.</param>
     /// <param name="optionsAction">The action to configure the DbContext options.</param>
     /// <param name="actorFactory">Factory to resolve the current ActorContext.</param>
+    /// <param name="configureOptions">Optional action to configure UnitOfWorkOptions.</param>
     /// <returns>The same IServiceCollection for chaining.</returns>
     public static IServiceCollection AddRepositoryPattern<TDbContext, TUserId>(
         this IServiceCollection services,
         Action<DbContextOptionsBuilder> optionsAction,
-        Func<IServiceProvider, ActorContext<TUserId>> actorFactory)
+        Func<IServiceProvider, ActorContext<TUserId>> actorFactory,
+        Action<UnitOfWorkOptions>? configureOptions = null)
         where TDbContext : DbContextBase<TUserId>
     {
         // Register ActorContext with DI
@@ -40,6 +43,11 @@ public static class RepositoryServiceCollectionExtensions
         // Register generic repository types
         services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
         services.AddScoped(typeof(IReadOnlyRepository<>), typeof(ReadOnlyRepository<>));
+
+        // Register options
+        var options = new UnitOfWorkOptions();
+        configureOptions?.Invoke(options);
+        services.AddSingleton(options);
 
         return services;
     }

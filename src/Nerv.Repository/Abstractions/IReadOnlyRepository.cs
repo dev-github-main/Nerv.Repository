@@ -1,4 +1,4 @@
-namespace Nerv.Repository.Abstractions;
+﻿namespace Nerv.Repository.Abstractions;
 
 using System.Linq.Expressions;
 

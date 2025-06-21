@@ -97,7 +97,7 @@ public class UserService
     {
         var user = new User { Id = Guid.NewGuid(), Name = name };
 
-        var userRepo = _unitOfWork.GetRepository<User>();
+        var userRepo = _unitOfWork.Repository<User>();
         await userRepo.AddAsync(user);
         await _unitOfWork.SaveChangesAsync();
     }

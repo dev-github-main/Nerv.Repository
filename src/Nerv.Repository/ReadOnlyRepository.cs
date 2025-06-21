@@ -1,4 +1,4 @@
-namespace Nerv.Repository;
+﻿namespace Nerv.Repository;
 
 using Microsoft.EntityFrameworkCore;
 using Nerv.Repository.Abstractions;

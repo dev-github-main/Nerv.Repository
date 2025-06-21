@@ -1,4 +1,4 @@
-namespace Nerv.Repository.Tests.Entities;
+﻿namespace Nerv.Repository.Tests.Entities;
 
 using Nerv.Repository.Entities;
 
