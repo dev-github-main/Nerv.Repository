@@ -90,7 +90,7 @@ builder.Services.AddRepositoryPattern<AppDbContext, Guid>(
     uowOptions =>
     {
         // Enable pluralization of table names (e.g. User -> Users)
-        uowOptions.RepositoryModelOptions.UsePluralization = true;
+        uowOptions.ModelOptions.UsePluralization = true;
     }
 );
 ```
