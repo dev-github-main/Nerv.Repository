@@ -1,4 +1,4 @@
-﻿namespace Nerv.Repository.Models;
+namespace Nerv.Repository.Abstractions.Models;
 
 public class PagedResult<T>
 {

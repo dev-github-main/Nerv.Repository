@@ -7,6 +7,7 @@ using Nerv.Repository.Abstractions.Entities;
 using Nerv.Repository.Contexts;
 using Nerv.Repository.Extensions;
 using Nerv.Repository.Options;
+using Nerv.Repository.Interfaces;
 
 /// <summary>
 /// Abstract base class for Entity Framework Core DbContext implementations using the repository and unit of work pattern.
@@ -15,8 +16,9 @@ using Nerv.Repository.Options;
 /// customization of model configuration through UnitOfWorkOptions.
 /// </summary>
 /// <typeparam name="TUserId">The type used for representing the user identifier in audit fields.</typeparam>
-public abstract class DbContextBase<TUserId>(DbContextOptions options, ActorContext<TUserId> actor, UnitOfWorkOptions uowOptions)
-    : DbContext(options), IDataContext
+public abstract class DbContextBase<TUserId, TSelf>(DbContextOptions options, ActorContext<TUserId> actor, UnitOfWorkOptions uowOptions)
+    : DbContext(options), IDataContext<TSelf>
+    where TSelf : DbContextBase<TUserId, TSelf>
 {
     private readonly ActorContext<TUserId> _actor = actor;
     private readonly UnitOfWorkOptions _uowOptions = uowOptions;

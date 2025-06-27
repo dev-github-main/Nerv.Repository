@@ -3,7 +3,7 @@
 using System.Linq.Expressions;
 using Microsoft.Extensions.Caching.Memory;
 using Nerv.Repository.Abstractions;
-using Nerv.Repository.Models;
+using Nerv.Repository.Abstractions.Models;
 
 /// <summary>
 /// A decorator repository that adds caching capabilities to repository queries.

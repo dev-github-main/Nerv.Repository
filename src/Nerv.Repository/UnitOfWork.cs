@@ -5,7 +5,9 @@ using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.Logging;
 using Nerv.Repository.Abstractions;
 using Nerv.Repository.Abstractions.Diagnostics;
+using Nerv.Repository.Interfaces;
 using Nerv.Repository.Options;
+using Microsoft.Extensions.DependencyInjection;
 
 /// <summary>
 /// Provides an implementation of the Unit of Work pattern for managing repository instances and transactions.
@@ -13,11 +15,18 @@ using Nerv.Repository.Options;
 /// <param name="dbContext">The database context instance.</param>
 /// <param name="logger">The logger instance for UnitOfWork.</param>
 /// <param name="options">The configuration options for UnitOfWork and repository behavior.</param>
-public class UnitOfWork(DbContext dbContext, ILogger<UnitOfWork> logger, UnitOfWorkOptions options) : IUnitOfWork, IUnitOfWorkDiagnostics
+/// <param name="serviceProvider">The service provider for resolving repository instances.</param>
+public class UnitOfWork<TDbContext>(
+    TDbContext dbContext,
+    ILogger<UnitOfWork<TDbContext>> logger,
+    UnitOfWorkOptions options,
+    IServiceProvider serviceProvider) : IUnitOfWork<TDbContext>, IUnitOfWorkDiagnostics
+where TDbContext : DbContext, IDataContext<TDbContext>
 {
-    private readonly DbContext _dbContext = dbContext;
-    private readonly ILogger<UnitOfWork> _logger = logger;
+    private readonly TDbContext _dbContext = dbContext;
+    private readonly ILogger<UnitOfWork<TDbContext>> _logger = logger;
     private readonly UnitOfWorkOptions _options = options;
+    private readonly IServiceProvider _serviceProvider = serviceProvider;
     private IDbContextTransaction? _transaction;
     private readonly Dictionary<Type, object> _repositories = [];
 
@@ -34,13 +43,16 @@ public class UnitOfWork(DbContext dbContext, ILogger<UnitOfWork> logger, UnitOfW
     /// <returns>The repository instance for the entity type.</returns>
     public IRepository<T> Repository<T>() where T : class
     {
-        var type = typeof(T);
-        if (!_repositories.TryGetValue(type, out object? value))
+        var key = typeof(T);
+
+        if (!_repositories.TryGetValue(key, out object? value))
         {
-            var repoType = typeof(Repository<>).MakeGenericType(type);
-            var instance = Activator.CreateInstance(repoType, _dbContext, _options)!;
-            value = instance;
-            _repositories[type] = value;
+            var repo = new Repository<TDbContext, T>(
+                _dbContext,
+                _options);
+
+            value = repo;
+            _repositories[key] = value;
         }
 
         return (IRepository<T>)value;

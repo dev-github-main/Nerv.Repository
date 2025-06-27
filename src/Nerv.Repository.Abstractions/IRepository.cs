@@ -1,7 +1,7 @@
 ﻿namespace Nerv.Repository.Abstractions;
 
 using System.Linq.Expressions;
-using Nerv.Repository.Models;
+using Nerv.Repository.Abstractions.Models;
 
 /// <summary>
 /// Defines generic repository operations for working with entities.

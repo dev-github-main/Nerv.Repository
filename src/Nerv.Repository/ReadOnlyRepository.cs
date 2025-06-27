@@ -8,7 +8,9 @@ using System.Linq.Expressions;
 /// Read-only implementation of a generic repository.
 /// </summary>
 /// <typeparam name="T">Entity type.</typeparam>
-public class ReadOnlyRepository<T>(IDataContext context) : IReadOnlyRepository<T> where T : class
+public class ReadOnlyRepository<TDbContext, T>(IDataContext context) : IReadOnlyRepository<T>
+    where T : class
+    where TDbContext : DbContext, Interfaces.IDataContext<TDbContext>
 {
     private readonly IDataContext _context = context;
 

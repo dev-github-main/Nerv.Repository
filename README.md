@@ -31,7 +31,7 @@ dotnet add package Nerv.Repository
 
 ---
 
-## 🛠️ Usage
+## 🛠️ Usage (Single or Multi-DbContext)
 
 ### 1. Define your entity
 ```csharp
@@ -43,14 +43,19 @@ public class User : Entity<Guid>
 
 ### 2. Configure your DbContext
 ```csharp
-public class AppDbContext : DbContextBase<Guid>
+public class AppDbContext : DbContextBase<Guid, AppDbContext>
 {
-    public AppDbContext(DbContextOptions<AppDbContext> options, ActorContext<Guid> actor)
-        : base(options, actor) { }
+    public AppDbContext(
+        DbContextOptions<AppDbContext> options,
+        ActorContext<Guid> actor,
+        UnitOfWorkOptions uowOptions) : base(options, actor, uowOptions)
+        {
+        }
 }
 ```
 
-### 3. Register dependencies
+### 3. Register everything in `Program.cs`
+
 ```csharp
 var builder = WebApplication.CreateBuilder(args);
 
@@ -59,6 +64,9 @@ builder.Services.AddHttpContextAccessor();
 
 // Register everything using the AddRepositoryPattern extension
 builder.Services.AddRepositoryPattern<AppDbContext, Guid>(
+    // Define the context name in a multi-database scenario,
+    // must be used also in a single database scenario
+    contextName: "Main",
     // DbContext configuration
     options =>
     {
@@ -72,8 +80,7 @@ builder.Services.AddRepositoryPattern<AppDbContext, Guid>(
     provider =>
     {
         // Resolve IHttpContextAccessor to access the current HTTP context
-        var httpContextAccessor = provider.GetRequiredService<IHttpContextAccessor>();
-        var httpContext = httpContextAccessor.HttpContext;
+        var httpContext = provider.GetRequiredService<IHttpContextAccessor>()?.HttpContext;
 
         // Extract the user ID from claims (e.g. OpenID Connect "sub" claim)
         var userIdClaim = httpContext?.User?.FindFirst("sub")?.Value;
@@ -93,27 +100,28 @@ builder.Services.AddRepositoryPattern<AppDbContext, Guid>(
         uowOptions.ModelOptions.UsePluralization = true;
     }
 );
+
+// Register UnitOfWorkFactory only once
+builder.services.AddUnitOfWorkFactory();
 ```
 
-### 4. Use in your services
-You only need to inject `IUnitOfWork` in your services. All repositories are accessed through it:
+### 4. Inject `IUnitOfWorkFactory` to resolve a unit of work
+You only need to inject `IUnitOfWorkFactory` in your services. All unit of work are accessed through it:
 
 ```csharp
 public class UserService
 {
     private readonly IUnitOfWork _unitOfWork;
 
-    public UserService(IUnitOfWork unitOfWork)
+    public UserService(IUnitOfWorkFactory factory)
     {
-        _unitOfWork = unitOfWork;
+        _unitOfWork = factory.GetUnitOfWork("Main");
     }
 
-    public async Task CreateUserAsync(string name)
+    public async Task CreateAsync()
     {
-        var user = new User { Id = Guid.NewGuid(), Name = name };
-
         var userRepo = _unitOfWork.Repository<User>();
-        await userRepo.AddAsync(user);
+        await userRepo.AddAsync(new User { Id = Guid.NewGuid(), Name = "Test" });
         await _unitOfWork.SaveChangesAsync();
     }
 }
@@ -152,36 +160,6 @@ public class UserTests
         Assert.NotNull(result);
     }
 }
-```
-
----
-
-## 🧱 Project Structure
-
-```
-src/
-  Nerv.Repository/
-    Abstractions/        # Interfaces and contracts
-    Contexts/            # DbContext and actor context
-    Extensions/          # Extension methods
-    LogEntities/         # Entities for audit logging
-    Entities/            # Domain entities
-    Models/              # Supporting models (e.g. pagination)
-    Options/             # Configuration options (UnitOfWorkOptions, RepositoryModelOptions)
-  tests/
-    Nerv.Repository.Tests/
-      Context/           # Test DbContext definitions
-      Entities/          # Test entities
-      Fixtures/          # Test setup utilities
-      Helpers/           # Shared test helpers (e.g. UnitOfWorkOptions factory)
-      Repositories/      # Repository-specific tests
-      UnitOfWork/        # UnitOfWork-specific tests
-  scripts/
-    clean-empty-lines.sh # Empty line cleanup script
-Nerv.Repository.sln       # Solution file at repository root
-.editorconfig             # Consistent formatting rules
-.vscode/settings.json     # VSCode editor configuration
-.git/hooks/pre-commit     # Pre-commit hook for automatic cleanup
 ```
 
 ---

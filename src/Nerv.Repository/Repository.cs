@@ -2,14 +2,22 @@
 
 using Microsoft.EntityFrameworkCore;
 using Nerv.Repository.Abstractions;
-using Nerv.Repository.Models;
+using Nerv.Repository.Abstractions.Models;
 using Nerv.Repository.Options;
 using System.Linq.Expressions;
 
-public class Repository<T>(IDataContext context, UnitOfWorkOptions options) : IRepository<T>, IReadOnlyRepository<T> where T : class
+public class Repository<TDbContext, T> : IRepository<T>, IReadOnlyRepository<T>
+    where T : class
+    where TDbContext : DbContext, Interfaces.IDataContext<TDbContext>
 {
-    private readonly IDataContext _context = context;
-    private readonly UnitOfWorkOptions _options = options;
+    private readonly Interfaces.IDataContext<TDbContext> _context;
+    private readonly UnitOfWorkOptions _options;
+
+    public Repository(Interfaces.IDataContext<TDbContext> context, UnitOfWorkOptions options)
+    {
+        _context = context;
+        _options = options;
+    }
 
     public async Task<IQueryable<T>> FindAsync(Expression<Func<T, bool>> predicate)
         => await Task.FromResult(_context.Query<T>().Where(predicate));

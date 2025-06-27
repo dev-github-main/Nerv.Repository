@@ -3,7 +3,7 @@
 using System;
 using System.Linq;
 using System.Threading.Tasks;
-using Nerv.Repository.Tests.Entities;
+using Nerv.Repository.Tests.TestData;
 using Nerv.Repository.Tests.Fixtures;
 using Xunit;
 
