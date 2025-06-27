@@ -1,19 +1,11 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net9.0</TargetFramework>
     <PackageId>Nerv.Repository</PackageId>
-    <Version>1.0.2</Version> <!-- aggiorna per ogni rilascio -->
-    <Authors>Nerv</Authors>
-    <Company>Nerv</Company>
     <Description>Generic repository + unit of work pattern with audit and actor support for EF Core.</Description>
     <PackageTags>repository;unitofwork;efcore;audit;dotnet</PackageTags>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
-    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-
-    <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
   </PropertyGroup>
 
   <ItemGroup>
