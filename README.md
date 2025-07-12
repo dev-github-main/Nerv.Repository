@@ -35,7 +35,7 @@ dotnet add package Nerv.Repository
 
 ### 1. Define your entity
 ```csharp
-public class User : Entity<Guid>
+public class User : EntityBase<Guid>
 {
     public string Name { get; set; }
 }
